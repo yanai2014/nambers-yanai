@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>משחק ניחוש המספר עם רמזים</title>
+</head>
+<body>
+    <h1>ברוכים הבאים למשחק ניחוש המספר עם רמזים!</h1>
+    <p>נסו לנחש את המספר בטווח נתון. יהיו לכם מספר ניסיונות מוגבל ותקבלו רמזים על האם המספר זוגי או אי זוגי.</p>
+    <p>בחרו רמת קושי כדי לקבוע את מגבלת הזמן, הטווח ומספר הניסיונות:</p>
+    <ul>
+        <li>1. קל (4 דקות, טווח 1 עד 100, 7 ניסיונות)</li>
+        <li>2. בינוני (12 דקות, טווח 1 עד 200, 50 ניסיונות)</li>
+        <li>3. קשה (20 דקות, טווח 1 עד 400, 100 ניסיונות)</li>
+        <li>4. סופר קשה (30 דקות, טווח 1 עד 1000, 150 ניסיונות)</li>
+    </ul>
+    <p>בהצלחה!</p>
+
+    <label for="difficulty">בחרו רמת קושי (1-4):</label>
+    <input type="number" id="difficulty" min="1" max="4">
+    <button onclick="startGame()">התחל משחק</button>
+
+    <div id="game" style="display: none;">
+        <p id="gameDetails"></p>
+        <label for="guess">ניחוש:</label>
+        <input type="number" id="guess">
+        <button onclick="makeGuess()">נחש</button>
+        <p id="hints"></p>
+        <p id="timer"></p>
+    </div>
+
+    <script>
+        let secretNumber, maxAttempts, remainingAttempts, timeLimit, startTime;
+
+        function startGame() {
+            const difficulty = parseInt(document.getElementById('difficulty').value);
+            if (isNaN(difficulty) || difficulty < 1 || difficulty > 4) {
+                alert('בבקשה בחרו רמת קושי תקינה (1-4).');
+                return;
+            }
+
+            if (difficulty === 1) {
+                timeLimit = 4 * 60;
+                secretNumber = Math.floor(Math.random() * 100) + 1;
+                maxAttempts = 7;
+            } else if (difficulty === 2) {
+                timeLimit = 12 * 60;
+                secretNumber = Math.floor(Math.random() * 200) + 1;
+                maxAttempts = 50;
+            } else if (difficulty === 3) {
+                timeLimit = 20 * 60;
+                secretNumber = Math.floor(Math.random() * 400) + 1;
+                maxAttempts = 100;
+            } else if (difficulty === 4) {
+                timeLimit = 30 * 60;
+                secretNumber = Math.floor(Math.random() * 1000) + 1;
+                maxAttempts = 150;
+            }
+
+            remainingAttempts = maxAttempts;
+            startTime = Date.now();
+
+            document.getElementById('gameDetails').innerText = `אני חושב על מספר בין 1 ל-${difficulty === 1 ? 100 : difficulty === 2 ? 200 : difficulty === 3 ? 400 : 1000}. יש לכם ${maxAttempts} ניסיונות ו-${timeLimit / 60} דקות לנחש אותו.`;
+            document.getElementById('game').style.display = 'block';
+            updateTimer();
+        }
+
+        function makeGuess() {
+            const guess = parseInt(document.getElementById('guess').value);
+            if (isNaN(guess)) {
+                alert('בבקשה הזינו ניחוש תקין.');
+                return;
+            }
+
+            remainingAttempts--;
+            if (guess === secretNumber) {
+                alert(`כל הכבוד! ניחשתם את המספר נכון!`);
+                document.getElementById('game').style.display = 'none';
+                return;
+            }
+
+            let hint = '';
+            if (guess < secretNumber) {
+                hint = 'נמוך מדי!';
+            } else {
+                hint = 'גבוה מדי!';
+            }
+
+            if (secretNumber % 2 === 0) {
+                hint += ' המספר זוגי.';
+            } else {
+                hint += ' המספר אי זוגי.';
+            }
+
+            document.getElementById('hints').innerText = hint;
+
+            if (remainingAttempts <= 0) {
+                alert(`מצטערים, השתמשתם בכל הניסיונות. המספר היה ${secretNumber}.`);
+                document.getElementById('game').style.display = 'none';
+            }
+        }
+
+        function updateTimer() {
+            const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+            const remainingTime = timeLimit - elapsedTime;
+            if (remainingTime <= 0) {
+                alert(`נגמר הזמן! המספר היה ${secretNumber}.`);
+                document.getElementById('game').style.display = 'none';
+                return;
+            }
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            document.getElementById('timer').innerText = `נותר זמן: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            setTimeout(updateTimer, 1000);
+        }
+    </script>
+</body>
+</html>
